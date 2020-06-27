@@ -1,0 +1,44 @@
+{% extends 'Bindemail.html' %}
+{% block is_verti %}
+    <input id="send_code" type="button" class="btn btn-primary float-left " value="发送验证码">
+{% endblock %}
+{% block js %}
+    <script type="text/javascript">
+     $('#send_code').click(function () {
+        var email = $('#id_email').val();
+        if(email == ""){
+            $("#tip").text("*邮箱不能为空！");
+            return false;
+        }
+         //发送邮箱
+         $.ajax({
+             url:"{% url 'send_code' %}",
+             type:"GET",
+             data:{
+                 'email':email,
+                 'send_for':'bind_email_code'
+             },
+             cache:false,
+             success:function (data) {
+                 if(data['status']=='ERROR') {
+                     alert(data['status']);
+                 }
+             }
+         });
+        //把按钮变灰
+         $(this).addClass('disabled');
+         $(this).attr('disabled',true);
+         var time = 30;
+         $(this).val(time + 's');
+         var interval = setInterval(()=>{
+             if (time <= 0){
+                 clearInterval(interval);
+                 $(this).removeClass('disabled').attr('disabled',false).val('发送验证码');
+                 return false;
+             }
+             time --;
+             $(this).val(time + 's');
+         },1000);
+     });
+    </script>
+{% endblock %}

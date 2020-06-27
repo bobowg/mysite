@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}登陆注册{% endblock %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block conent %}
+    <div  class="container-fluid">
+        <div class="row">
+            <div class="col-sm-4 offset-sm-4 col-xl-4 offset-xl-4 col-lg-4 offset-lg-4">
+                <p></p>
+                {% if not user.is_authenticated %}
+                    <div class="card">
+                        <div class="card-header">用户注册</div>
+                        <div class="card-body">
+                            <form action="#" method="post" >
+                                {% csrf_token %}
+                                {% for field in register_from %}
+                                    <label for={{ field.id_for_label }}>{{ field.label }}</label>
+                                    {{ field }}
+                                    <p class="text-danger">{{ field.errors.as_text }}</p>
+                                {% endfor %}
+                                <span class="text-danger">{{ register_from.non_field_errors }}</span>
+                                <div class="btn-group offset-2 offset-sm-3 offset-md-1 offset-xl-3">
+                                    <input id="send_code" type="button" class="btn btn-primary float-left " value="发送验证码">
+                                    <input type="reset" class="btn btn-primary  " value="重置">
+                                    <input type="submit" class="btn btn-primary  " value="注册">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <script type="text/javascript">
+                        location.href = '{% url "home" %}';
+                    </script>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block js %}
+    <script type="text/javascript">
+     $('#send_code').click(function () {
+        var email = $('#id_email').val();
+        if(email == ""){
+            $("#tip").text("*邮箱不能为空！");
+            return false;
+        }
+         //发送邮箱
+         $.ajax({
+             url:"{% url 'send_code' %}",
+             type:"GET",
+             data:{
+                   'email':email,
+                   'send_for':'register_code'
+             },
+             cache:false,
+             success:function (data) {
+                 if(data['status']=='ERROR') {
+                     alert(data['status']);
+                 }
+             }
+         });
+        //把按钮变灰
+         $(this).addClass('disabled');
+         $(this).attr('disabled',true);
+         var time = 30;
+         $(this).val(time + 's');
+         var interval = setInterval(()=>{
+             if (time <= 0){
+                 clearInterval(interval);
+                 $(this).removeClass('disabled').attr('disabled',false).val('发送验证码');
+                 return false;
+             }
+             time --;
+             $(this).val(time + 's');
+         },1000);
+     });
+    </script>
+{% endblock %}

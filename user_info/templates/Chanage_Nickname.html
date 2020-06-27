@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}修改昵称{% endblock %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block conent %}
+    <div  class="container-fluid">
+        <div class="row">
+            <div class="col-sm-4 offset-sm-4 col-xl-4 offset-xl-4 col-lg-4 offset-lg-4">
+             <p></p>
+                <div class="card">
+                    <div class="card-header">修改昵称</div>
+                    <div class="card-body">
+                        <form action="#" method="post" >
+                            {% csrf_token %}
+                           {% for field in form %}
+                               {% if not field.is_hidden %}
+                               <label for={{ field.id_for_label }}>{{ field.label }}</label>
+                               {% endif %}
+                               {{ field }}
+                               <p class="text-danger">{{ field.errors.as_text }}</p>
+                           {% endfor %}
+                         <span class="text-danger">{{ form.non_field_errors }}</span>
+                            <input type="submit" class="btn btn-primary float-left " value="修改昵称">
+                            <input type="button" class="btn btn-primary float-right" value="返回" onclick="window.history.back();" />
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

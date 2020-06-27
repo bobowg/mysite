@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}个人资料{% endblock %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block conent %}
+   <div  class="container-fluid">
+     <p></p>
+        <div class="row">
+            <div class="card col-sm-10 offset-sm-1 col-xl-10 offset-xl-1 col-lg-10 offset-lg-1">
+                {% if user.is_authenticated %}
+                    <h2>{{ user.username }}</h2>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">昵称：{{ user.get_nickname }} <a href="{% url 'change_nickname' %}?from={{ request.get_full_path }}">修改昵称</a> </li>
+                        <li class="list-group-item">邮箱：
+                            {% if not user.email %}
+                                用户暂时没有绑定邮箱
+                                <a href="{% url 'bindemail' %}?from={{ request.get_full_path }}">绑定邮箱</a>
+                            {% else %}
+                                {{ user.email }}
+                            {% endif %}
+                        </li>
+{#                        <li class="list-group-item">姓名：{{ user.last_name }}{{ user.first_name }}</li>#}
+                        <li class="list-group-item">
+                            最后登陆时间：{{ user.last_login }}
+                        </li>
+                        <li class="list-group-item">密码修改：<a href="{% url 'change_password' %}">密码修改</a> </li>
+                    </ul>
+                {% else %}
+                    <script type="text/javascript">
+                      alert("没有登陆，请登陆！");
+                      location.href = '{% url "login" %}';
+                    </script>
+                {% endif %}
+            </div>
+        </div>
+   </div>
+{% endblock %}

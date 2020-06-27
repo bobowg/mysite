@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}首页{% endblock %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block conent %}
+<div class="container-fluid">
+    <h3 class="home-content">欢迎来到我的个人网站</h3>
+    <div id="container" ></div>
+    <div class="row">
+    <div class=" col-sm-12 col-xl-3 col-xs-12">
+         <div class="card" >
+        <div class="card-header">今天热门博客</div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for hot_data in hot_datas %}
+                    <li class="list-group-item">
+                        <a href="{% url 'blog_detail' hot_data.content_object.id %}">
+                            {{ hot_data.content_object.title }}({{ hot_data.read_num }})
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">今天暂时没有热门博客</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    </div>
+        <div class=" col-sm-12 col-xl-3 col-xs-12">
+             <div class="card" >
+        <div class="card-header">昨天热门博客</div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for hot_data in ys_hot_datas %}
+                    <li class="list-group-item">
+                        <a href="{% url 'blog_detail' hot_data.content_object.id %}">
+                            {{ hot_data.content_object.title }}({{ hot_data.read_num }})
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">昨天暂时没有热门博客</li>
+                {% endfor %}
+            </ul></div>
+    </div>
+        </div>
+        <div class="col-sm-12 col-xl-3 col-xs-12">
+            <div class="card">
+        <div class="card-header">７天热门博客</div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for weekday_hot_data in weekday_hot_datas %}
+                    <li class="list-group-item">
+                        <a href="{% url 'blog_detail' weekday_hot_data.id %}">
+                            {{ weekday_hot_data.title }}({{ weekday_hot_data.read_nums }})</a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">7天暂时没有热门博客</li>
+                {% endfor %}
+
+            </ul></div>
+    </div>
+        </div>
+
+        <div class=" col-sm-12 col-xl-3 col-xs-12">
+             <div class="card">
+        <div class="card-header">30天热门博客</div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for weekday_hot_data in month_hot_datas %}
+                    <li class="list-group-item">
+                        <a href="{% url 'blog_detail' weekday_hot_data.id %}">
+                            {{ weekday_hot_data.title }}({{ weekday_hot_data.read_nums }})</a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">30天暂时没有热门博客</li>
+                {% endfor %}
+
+            </ul></div>
+    </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+{% block js %}
+    <script src="http://cdn.highcharts.com.cn/highcharts/highcharts.js"></script>
+    <script src="http://cdn.highcharts.com.cn/highcharts/highcharts.js"></script>
+    <script>
+        // 图表配置
+        var options = {
+            chart: {
+                type: 'line'                          //指定图表的类型，默认是折线图（line）
+            },
+            title: {
+                text:null
+            },
+            xAxis: {
+                categories: {{ dates|safe }},   // x 轴分类
+                tickMarkPlacement:'on',
+                title:{text:'前七日阅读量变化'},
+            },
+            yAxis: {
+                title: {text: null},
+                labels:{enabled:false},
+                gridLineDashStyle:'Dash'
+            },
+            series: [{                              // 数据列
+                name: '阅读量',                        // 数据列名
+                data: {{ read_nums }}                    // 数据
+            }],
+            plotOptions:{
+                line:{
+                    dataLabels:{enabled:true}
+                },
+            },
+            legend:{enabled: false},
+            credits:{enabled:false},
+        };
+        // 图表初始化函数
+        var chart = Highcharts.chart('container', options);
+    </script>
+{% endblock %}

@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load comment_tags %}
+{% block title %}{{ blog.title }}{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+{% endblock %}
+{% block li_active %}active{% endblock %}
+{% block conent %}
+    <div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10 col-10 offset-md-1 offset-1">
+            <h3>{{ blog.title }}</h3>
+            <ul class="blog-info-description">
+                <li><img src="{% static 'img/person.svg' %}"　alt="作者"　title="作者" > {{ blog.author }}</li>
+                <li><img src="{% static 'img/file-ruled.svg' %}"　alt="分类" title="分类"　> <a href="{% url 'blog_with_type' blog.blog_type_id %}">
+                    {{ blog.blog_type }}</a></li>
+                <li><img src="{% static 'img/clock.svg' %}" alt="发表日期" title="发表日期" > {{ blog.created_time |date:'Y-m-d H:n:s' }}</li>
+                <li><img src="{% static 'img/credit-card.svg' %}" title="阅读数" alt="阅读数" > ({{ blog.read_num }})</li>
+                <li><img src="{% static 'img/person-plus.svg' %}" title="评论" alt="评论" > ({% get_comment_count blog %})</li>
+            </ul>
+            <div class="blog-content">{{ blog.content|safe}}</div>
+            <div class="like" onclick="likeChange(this,'blog',{{ blog.id }})">
+                <svg id="bi" class="bi bi-hand-thumbs-up {% get_like_stauts blog %}" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/>
+                </svg>
+                <span id="like-num" class="like-num">({% get_likecount blog %})</span>喜欢
+            </div>
+            <div class="blog-more">
+                <p>上一篇：
+                    {% if previous_blog %}
+                        <a href="{% url 'blog_detail' previous_blog.id %}"> {{ previous_blog.title }} </a>
+                    {% else %}
+                        没有了
+                    {% endif %}
+                </p>
+                <p>下一篇:
+                    {% if next_blog %}
+                        <a href="{% url 'blog_detail' next_blog.id %}"> {{ next_blog.title }}</a>
+                    {% else %}
+                        没有了
+                    {% endif %}
+
+                </p>
+            </div>
+            <div id="mymodal" class="modal fade"  tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <form id="login_medal_from" action="#" method="post" >
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">用户登陆</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                {% csrf_token %}
+                                {% for field in login_from %}
+                                    <label for={{ field.id_for_label }}>{{ field.label }}</label>
+                                    {{ field }}
+                                {% endfor %}
+                                <span id="ligon_medal_tip" class="text-danger"></span>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                <button type="submit" class="btn btn-primary">登陆</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-10 offset-md-1 offset-1">
+                <div class="comment-area" style="overflow: hidden;" >
+                    <h3 >提交评论</h3>
+                    {%  if user.is_authenticated %}
+                        <form id="comment_from" action="{% url 'update_comment' %}" method="post">
+                            {% csrf_token %}
+                            <div class="from-group">
+                                <label for="comment_text"> {{ user.get_username_or_nickname }}欢迎评论～</label>
+                                <div id="reply_content_container" style="display: none;">
+                                    <p>回复：</p>
+                                    <div id="reply_content">
+                                    </div>
+                                </div>
+                                {% get_comment_from blog as comment_from %}
+                                {% for feild in comment_from %}
+                                    {{ feild }}
+                                {% endfor %}
+                            </div>
+
+                            <br>
+                            <input type="submit" value="提交评论" class="btn btn-primary" style="float: right;">
+                        </form>
+                    {% else %}
+                        <p>您尚未登陆。登陆后方可评论！</p>
+                        <a href="{% url 'login' %}?from={{ request.get_full_path }}" class="btn btn-primary">登陆</a>
+                        <span>or</span>
+                        <a href="{% url 'register' %}?from={{ request.get_full_path }}" class="btn btn-danger">注册</a>
+                    {% endif %}
+                </div>
+                <div class="comment-area">
+                    <h3>评论列表</h3>
+                    <div id="comment_list">
+                        {% get_comments blog as comments %}
+                        {% for comment in comments %}
+                            <div id="root_{{ comment.id }}" class="comment">
+                                <span>{{ comment.user.get_username_or_nickname }}</span>
+                                <span>    ( {{ comment.comment_time|date:"Y-m-d H:i:s" }}):</span>
+
+                                <div id="comment_{{ comment.id }}">  {{ comment.context | safe }}</div>
+                                <div class="like" onclick="likeChange(this,'{% get_content_type comment %}',{{ comment.id }})">
+                                    <svg id="bi" class="bi bi-hand-thumbs-up {% get_like_stauts comment %}" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/>
+                                    </svg>
+                                    <span id="like-num" class="like-num">({% get_likecount comment %})</span>
+                                </div>
+                                <a href="javascript:reply({{ comment.id }});">回复</a>
+
+
+                                {% for  reply in comment.root_comment.all %}
+                                    <div class="reply">
+                                        <span>  {{ reply.user.get_username_or_nickname }}</span>
+                                        <span>     ( {{ reply.comment_time|date:"Y-m-d H:i:s" }}):</span>
+                                        <span> 回复：</span>
+                                        <span>  {{ reply.reply_to.get_username_or_nickname }}</span>
+
+                                        <div id="comment_{{ reply.id }}">  {{ reply.context | safe }}</div>
+                                        <div class="like" onclick="likeChange(this,'{% get_content_type reply %}',{{ reply.id }})">
+                                            <svg id="bi" class="bi bi-hand-thumbs-up {% get_like_stauts reply %}" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/>
+                                            </svg>
+                                            <span id="like-num" class="like-num">({% get_likecount reply %})</span>
+                                        </div>
+                                        <a href="javascript:reply({{ reply.id }});">回复</a>
+                                    </div>
+                                {% endfor %}
+
+
+                            </div>
+                        {% empty %}
+                            <div id="no_comment">暂无评论</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+    <script type="text/javascript">
+        String.prototype.format = function () {
+            var str = this;
+            for (var i =0;i < arguments.length;i++){
+                var str =  str.replace(new RegExp( '\\{'+ i +'\\}','g'),arguments[i])
+            };
+            return str;
+        }
+        function reply(reply_comment_id) {
+            $("#reply_comment_id").val(reply_comment_id);
+            var html = $("#comment_"+ reply_comment_id).html();
+            $("#reply_content").html(html);
+            $("#reply_content_container").show(3000);
+            $("html").animate({scrollTop:$("#comment_from").offset().top - 60},300 ,function () {
+                CKEDITOR.instances["id_text"].focus();
+
+            })
+        };
+        function numFormat(num) {
+            nums = ("00"+num).substr(-2);
+            return nums;
+        };
+        function timeFormat(timestamp){
+            var datetime = new Date(timestamp * 1000);
+            var year = datetime.getFullYear();
+            var month = datetime.getMonth()+1;
+            var day = datetime.getDate();
+            var hour = datetime.getHours();
+            var minutes = datetime.getMinutes();
+            var seconds = datetime.getSeconds();
+            tims = year+'-'+numFormat(month)+'-'+numFormat(day)+' '+numFormat(hour)+ ':'+numFormat(minutes)+':'+numFormat(seconds);
+            return tims;
+        };
+        $('#comment_from').submit(function () {
+            if(CKEDITOR.instances["id_text"].document.getBody().getText().trim()==""){
+                alert("内容不能为空！请输入内容！")
+                return false;
+            }
+            //更新数据
+            CKEDITOR.instances["id_text"].updateElement()
+            //异步提交
+            $.ajax({
+                url:"{% url 'update_comment' %}",
+                type:'POST',
+                data:$(this).serialize(),
+                cache:false,
+                success:function (data) {
+                    if(data['status']=='Success'){
+                        if ( $("#reply_comment_id").val()=='0'){
+                            //评论
+                            var comment_html = "<div id=\"root_{0}\" class=\"comment\">\n" +
+                                "                                <span>{1}</span>\n" +
+                                "                                <span> ({2}):</span>\n" +
+                                "\n" +
+                                "                                <div id=\"comment_{0}\">  {3}</div>\n" +
+                                "                                <div class=\"like\" onclick=\"likeChange(this,'{4}',{0})\">\n" +
+                                "                                    <svg id=\"bi\" class=\"bi bi-hand-thumbs-up \" width=\"1em\" height=\"1em\" viewBox=\"0 0 16 16\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
+                                "                                        <path fill-rule=\"evenodd\" d=\"M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z\"/>\n" +
+                                "                                    </svg>\n" +
+                                "                                    <span id=\"like-num\" class=\"like-num\">0</span>\n" +
+                                "                                </div>\n" +
+                                "                               <div><a href=\"javascript:reply({0});\">回复</a></div></div>";
+                            comment_html = comment_html.format(data['id'],data['username'],timeFormat(data['comment_time']),data['text'], data['content_type']);
+                            $("#comment_list").prepend(comment_html);
+                        }else
+                        {
+                            //回复
+                            var reply_html ="<div class=\"reply\">\n" +
+                                "                                        <span>  {1}</span>\n" +
+                                "                                        <span>     ( {2}):</span>\n" +
+                                "                                        <span> 回复：</span>\n" +
+                                "                                        <span>  {3}</span>\n" +
+                                "\n" +
+                                "                                        <div id=\"comment_{0}\">  {4}</div>\n" +
+                                "                                        <div class=\"like\" onclick=\"likeChange(this,'{5}',{0})\">\n" +
+                                "                                            <svg id=\"bi\" class=\"bi bi-hand-thumbs-up\" width=\"1em\" height=\"1em\" viewBox=\"0 0 16 16\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
+                                "                                                <path fill-rule=\"evenodd\" d=\"M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16v-1c.563 0 .901-.272 1.066-.56a.865.865 0 0 0 .121-.416c0-.12-.035-.165-.04-.17l-.354-.354.353-.354c.202-.201.407-.511.505-.804.104-.312.043-.441-.005-.488l-.353-.354.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581 0-.211-.027-.414-.075-.581-.05-.174-.111-.273-.154-.315L12.793 9l.353-.354c.353-.352.373-.713.267-1.02-.122-.35-.396-.593-.571-.652-.653-.217-1.447-.224-2.11-.164a8.907 8.907 0 0 0-1.094.171l-.014.003-.003.001a.5.5 0 0 1-.595-.643 8.34 8.34 0 0 0 .145-4.726c-.03-.111-.128-.215-.288-.255l-.262-.065c-.306-.077-.642.156-.667.518-.075 1.082-.239 2.15-.482 2.85-.174.502-.603 1.268-1.238 1.977-.637.712-1.519 1.41-2.614 1.708-.394.108-.62.396-.62.65v4.002c0 .26.22.515.553.55 1.293.137 1.936.53 2.491.868l.04.025c.27.164.495.296.776.393.277.095.63.163 1.14.163h3.5v1H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z\"/>\n" +
+                                "                                            </svg>\n" +
+                                "                                            <span id=\"like-num\" class=\"like-num\">(0)</span>\n" +
+                                "                                        </div>\n" +
+                                "                                        <a href=\"javascript:reply({0});\">回复</a>\n" +
+                                "</div>";
+                            reply_html = reply_html.format(data['id'],data['username'],timeFormat(data['comment_time']),data['reply_to'], data['text'], data['content_type']);
+                            $("#root_"+data['root_id']).prepend(reply_html);
+                        }
+                        $("#reply_content_container").hide(3000);
+                        $("#reply_comment_id").val("0");
+                        CKEDITOR.instances.id_text.setData('');
+                        $("#no_comment").remove()
+                        alert("成功评论！")
+                    }else
+                    {
+                        alert('数据不能为空！')
+                    }
+                },
+                error:function (xhr) {
+                    alert(xhr.message)
+                }
+            });
+            return false;
+        });
+        function likeChange(obj,content_type,object_id) {
+            var is_like =  obj.getElementsByClassName('active').length ==0
+            $.ajax({
+                url:"{% url 'update_likechange' %}",
+                type: 'GET',
+                data:{
+                    content_type:content_type,
+                    object_id:object_id,
+                    is_like:is_like
+                },
+                cache: false,
+                success:function (data) {
+                    console.log(data)
+                    if(data['stauts']=='SUCCESS'){
+                        if(is_like){
+                            $(obj.getElementsByClassName("bi")).addClass('active');
+                        }else
+                        {
+                            $(obj.getElementsByClassName("bi")).removeClass('active');
+                        }
+                        $(obj.getElementsByClassName('like-num')).text('('+data['liked_num']+')');
+                    }else{
+                        if(data['code']==300){
+                            $("#mymodal").modal('show');
+                        }else
+                        {
+                            alert(data['message']);
+                        }
+
+                    }
+                },
+                error:function (xhr) {
+                    alert('出错了')
+                }
+            });
+        }
+        $("#login_medal_from").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url:'{% url "login_form" %}',
+                type:'POST',
+                data:$(this).serialize(),
+                cache:false,
+                success:function (data) {
+                    if(data['status']=='SUCCESS'){
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        $('#ligon_medal_tip').text("用户名或密码不正确!");
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

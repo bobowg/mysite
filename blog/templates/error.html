@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{{ message }}！{% endblock %}
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block conent %}
+    <script type="text/javascript">
+       alert( '{{ message }}')
+        window.history.back(-1);
+    </script>
+{% endblock %}
